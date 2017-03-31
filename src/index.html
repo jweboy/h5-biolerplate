@@ -1,66 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
-    <meta charset="UTF-8">
-    <title>Wechat H5 Boilerplate</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <!-- Add your keywords and description here for SEO. -->
-    <meta name="keywords" content="">
-    <meta name="description" content="">
-    <link rel="shortcut icon" type="image/png" href="images/favicon.png"/>
+    <title>H5 Boilerplate</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="apple-touch-fullscreen" content="YES">
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="renderer" content="webkit">
+    <link rel="shortcut icon" type="image/png" href="imgs/favicon.jpg"/>
+    <script>
+        (function() {
+            // 根据不同设备设置缩放比例
+            var phoneWidth = parseInt(window.screen.width),
+                phoneScale = phoneWidth / 640,
+                ua = navigator.userAgent,
+                version = parseFloat(RegExp.$1);
 
-    <!-- Uncomment this if you need apple touch icon. -->
-    <!--
-    <link rel="apple-touch-icon" href="touch-icon-iphone.png">
-    <link rel="apple-touch-icon" sizes="76x76" href="touch-icon-ipad.png">
-    <link rel="apple-touch-icon" sizes="120x120" href="touch-icon-iphone-retina.png">
-    <link rel="apple-touch-icon" sizes="152x152" href="touch-icon-ipad-retina.png">
-    -->
+            var meta = document.createElement('meta');
+            meta.setAttribute('name', 'viewport');
 
+            if (/Android (\d+\.\d+)/.test(ua)) {
+                // andriod 2.3
+                if (version > 2.3) {
+                    // document.write('<meta name="viewport" content="width=640, minimum-scale = ' + phoneScale + ', maximum-scale = ' + phoneScale + ', target-densitydpi=device-dpi">');
+                    meta.setAttribute('content', 'width=640, minimum-scale = ' + phoneScale + ', maximum-scale = ' + phoneScale + ', target-densitydpi=device-dpi');
+                    // andriod 2.3以上
+                } else {
+                    // document.write('<meta name="viewport" content="width=640, target-densitydpi=device-dpi">');
+                    meta.setAttribute('content', 'width=640, target-densitydpi=device-dpi');
+                }
+                // 其他系统
+            } else {
+                // document.write('<meta name="viewport" content="width=640, user-scalable=no, target-densitydpi=device-dpi">');
+                meta.setAttribute('content', 'width=640, target-densitydpi=device-dpi');
+            }
+
+            document.documentElement.firstElementChild.appendChild(meta);
+        }());
+
+    </script>
     <!-- 开发环境插入合并打包的css,以下两个注释需要保留 -->
     <!-- inject:css -->
     <!-- endinject -->
 </head>
-
 <body>
-<div class="loading-overlay">
-    <img src="images/loading.svg">
-</div>
-
-<div class="swiper-container">
-    <div class="swiper-wrapper">
-        <div class="swiper-slide slide-1">
-            <div class="item-image animated" data-ani-name="slideInLeft" data-ani-duration="1s" data-ani-delay="0s"></div>
-            <p class="item-text animated" data-ani-name="slideInRight" data-ani-duration="1s" data-ani-delay="0.3s">I'm a coder!</p>
+    <!-- loading动画模块 -->
+    <div id="loadingArea">
+        <div class="cube">
+            <div class="plane-1">
+                <div class="top-left">
+                </div>
+                <div class="top-middle">
+                </div>
+                <div class="top-right">
+                </div>
+                <div class="middle-left">
+                </div>
+                <div class="middle-middle">
+                </div>
+                <div class="middle-right">
+                </div>
+                <div class="bottom-left">
+                </div>
+                <div class="bottom-middle">
+                </div>
+                <div class="bottom-right">
+                </div>
+            </div>
+            <div class="plane-2">
+                <div class="top-left">
+                </div>
+                <div class="top-middle">
+                </div>
+                <div class="top-right">
+                </div>
+                <div class="middle-left">
+                </div>
+                <div class="middle-middle">
+                </div>
+                <div class="middle-right">
+                </div>
+                <div class="bottom-left">
+                </div>
+                <div class="bottom-middle">
+                </div>
+                <div class="bottom-right">
+                </div>
+            </div>
+            <div class="plane-3">
+                <div class="top-left">
+                </div>
+                <div class="top-middle">
+                </div>
+                <div class="top-right">
+                </div>
+                <div class="middle-left">
+                </div>
+                <div class="middle-middle">
+                </div>
+                <div class="middle-right">
+                </div>
+                <div class="bottom-left">
+                </div>
+                <div class="bottom-middle">
+                </div>
+                <div class="bottom-right">
+                </div>
+            </div>
         </div>
-        <div class="swiper-slide slide-2">
-            <div class="item-image animated" data-ani-name="bounceInDown" data-ani-duration="1s" data-ani-delay="0s"></div>
-            <p class="item-text animated" data-ani-name="bounceInUp" data-ani-duration="1s" data-ani-delay="0.3s">I'm a frontend developer!</p>
-        </div>
-        <div class="swiper-slide slide-3">
-            <div class="item-image animated" data-ani-name="flipInX" data-ani-duration="1s" data-ani-delay="0s"></div>
-            <p class="item-text animated" data-ani-name="flipInY" data-ani-duration="1s" data-ani-delay="0.3s">I'm a javascript newbie!</p>
+        <div class="loadingText" id="loadingText">
+            0%
         </div>
     </div>
-</div>
-
-<button class="up-arrow">
-    <i class="icon-angle-double-up"></i>
-</button>
-
-<button class="btn-music">
-    <i class="icon-note"></i>
-</button>
-
-<audio loop>
-    <source src="audios/background.mp3" type="audio/mpeg">
-</audio>
-
-<!-- 开发环境插入合并打包的js,以下两个注释需要保留 -->
-<!-- inject:js -->
-<!-- endinject -->
-
+    <!-- /loading动画模块 -->
+    <!-- swiper轮播模块 -->
+    <div class="swiper-container u-hidden" id="swiper">
+        <div class="swiper-wrapper">
+            <div class="swiper-slide p1-bg">
+                <img class="item-image slideElement animated slideInLeft swiper-lazy" data-src="imgs/github-1.png" alt="示意图">
+                <p class="item-text slideElement animated slideInRight">I'm a coder!</p>
+            </div>
+            <div class="swiper-slide p2-bg">
+                <img class="item-image slideElement animated bounceInDown swiper-lazy" data-src="imgs/github-2.png" alt="示意图">
+                <p class="item-text slideElement animated bounceInUp">I'm a frontend developer!</p>
+            </div>
+            <div class="swiper-slide p3-bg">
+                <img class="item-image slideElement animated flipInX swiper-lazy" data-src="imgs/github-3.png" alt="示意图">
+                <p class="item-text slideElement animated flipInY">I'm a javascript newbie!</p>
+            </div>
+        </div>
+    </div>
+    <!-- /swiper轮播模块 -->
+    <!-- 轮播页向上小图标模块 -->
+    <button class="up-arrow u-hidden" id="upArrow">
+        <i class="iconfont icon-arrow"></i>
+    </button>
+    <!-- /轮播页向上小图标模块 -->
+    <!-- 轮播页音乐播放小图标模块 -->
+    <button class="btn-music u-hidden" id="musicBtn">
+        <i class="iconfont icon-music"></i>
+    </button>
+    <!-- /轮播页音乐播放小图标模块 -->
+    <!-- 背景音乐模块 -->
+    <audio loop>
+        <source src="resource/background.mp3" type="audio/mpeg">
+    </audio>
+    <!-- /背景音乐模块 -->
+    <!-- 开发环境插入合并打包的js,以下两个注释需要保留 -->
+    <!-- inject:js -->
+    <!-- endinject -->
 </body>
-
 </html>

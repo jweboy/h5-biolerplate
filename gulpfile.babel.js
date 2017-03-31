@@ -4,22 +4,21 @@
  * @version  1.0.0
  */
 import gulp from 'gulp';
-import plugin from 'gulp-load-plugins';
-import gulpsync from 'gulp-sync';
+import loadPlugins from 'gulp-load-plugins';
 
 import del from 'del';
+import browserify from 'browserify';
 import browserSync from 'browser-sync';
 import runSequence from 'run-sequence';
 import streamSeries from 'stream-series';
+import source from 'vinyl-source-stream';
 
-import env from './config/env.js';
-import config from './config/path.js';
-import vendors from './config/vendors.js';
 
-let _ = plugin();
-let gulpSync = gulpsync(gulp);
+import env from './config/env';
+import vendors from './config/vendors';
 
-// console.log(_);
+let plugins = loadPlugins();
+console.log(env);
 // console.log('您当前所处的模式:' + env);
 
 /**
@@ -31,74 +30,79 @@ let gulpSync = gulpsync(gulp);
  * @example gulp系列的task任务配置
  *
  */
-
-console.log(_);
-
-// clean release floder
+// 清理文件目录 release
 gulp.task('clean-files', function(cb) {
     return del(['release'], cb);
 });
 
-/**
- * 媒体资源文件
- * copy src/resource => release/resource
- */
-gulp.task('publish-resource', () => {
+// 拷贝媒体资源  copy src/resource => release/resource
+gulp.task('publish-resource', function() {
     return gulp.src('src/resource/*')
         .pipe(gulp.dest('release/resource'));
 });
-/**
- * 音乐文件
- * copy src/imgs => release/imgs
- */
-gulp.task('publish-images', () => {
+
+// 拷贝图片资源  copy src/imgs => release/imgs
+gulp.task('publish-images', function() {
     return gulp.src('src/imgs/*')
-
-            // .pipe(_.imagemin())
-            .pipe(gulp.dest('release/imgs'));
+        .pipe(gulp.dest('release/imgs'));
 });
 
-// minify+bundle src/styles/**/*.css => release/styles/bundle.min.css
-gulp.task('publish-css', () => {
-    return gulp.src('src/styles/**/*.css')
-        .pipe(_.concat('bundle.min.css'))
-        .pipe(_.autoprefixer())
-        .pipe(_.minifyCss())
-        .pipe(gulp.dest('release/styles'));
-
+// 拷贝字体资源  copy src/fonts => release/fonts
+gulp.task('publish-fonts', () => {
+    return gulp.src('src/fonts/*')
+        .pipe(gulp.dest('release/fonts'));
 });
 
 /**
- * 提取公用模块合并到自定义的js
- * 打包压缩
+ * 合并自定义css和模块依赖css
+ * css新属性前缀自动补全
  */
+let cssVendors = vendors.styles;
 
-// minify+bundle src/styles/**/*.js => release/styles/bundle.min.js
-gulp.task('publish-js', () => {
-    const jsVendors = vendors.js;
-
+gulp.task('publish-css', function() {
     return streamSeries(
-        gulp.src(jsVendors),
-        gulp.src('src/scripts/*.js')
-            .pipe(_.plumber({
+        gulp.src(cssVendors),
+        gulp.src('src/styles/**/*.css')
+            .pipe(plugins.plumber({
                 errorHandler: errorAlert
             }))
+            .pipe(plugins.autoprefixer())
     )
-    .pipe(_.concat('bundle.min.js'))
-    .pipe(gulp.dest('release/scripts'));
-
+    .pipe(plugins.concat('bundle.css'))
+    .pipe(gulp.dest('release/styles'));
 });
 
-gulp.task('inject', () => {
+/**
+ * 提取js功能模块,在main主入口中输出模块
+ * 合并公用js模块到main.js
+ */
+let jsVendors = vendors.scripts;
+jsVendors.push('src/scripts/main.js');
+console.log(jsVendors);
+
+gulp.task('publish-js', function() {
+    return browserify({
+            entries: jsVendors
+        })
+        .bundle()
+        .pipe(plugins.plumber({
+            errorHandler: errorAlert
+        }))
+        .pipe(source('bundle.js'))
+        .pipe(gulp.dest('release/scripts'));
+});
+
+// 将打包合并的bundle.js 与 bundle.css 动态写入到 index.html中
+gulp.task('inject', function() {
     let target = gulp.src('src/index.html'),
         assets = gulp.src([
-            'release/styles/bundle.min.css',
-            'release/scripts/bundle.min.js'
+            'release/styles/bundle.css',
+            'release/scripts/bundle.js'
           ], {
             read: false
         });
 
-    return target.pipe(_.inject(assets, {
+    return target.pipe(plugins.inject(assets, {
         ignorePath: 'release',
         addRootSlash: false,
         removeTags: true
@@ -106,30 +110,85 @@ gulp.task('inject', () => {
     .pipe(gulp.dest('release'));
 });
 
-// gulp.task('htmlMin', () => {
-//     return gulp.src(config.dist.htmlFile)
-//         .pipe(_.htmlmin(config.htmlMinConfig))
-//         .pipe(gulp.dest(config.dist.html));
+// 压缩css
+gulp.task('minify-css', () => {
+    return gulp.src('release/styles/bundle.css')
+        .pipe(plugins.cleanCss({
+            debug: true
+        }))
+        .pipe(plugins.rename({
+            suffix: '.min'
+        }))
+        .pipe(gulp.dest('release/styles'));
+});
+
+// 压缩js
+gulp.task('minify-js', () => {
+    return gulp.src('release/scripts/bundle.js')
+        .pipe(plugins.uglify())
+        .pipe(plugins.rename({
+            suffix: '.min'
+        }))
+        .pipe(gulp.dest('release/scripts'));
+});
+
+// 注入 bundle.min.css 和 bundle.min.js
+gulp.task('inject-html', () => {
+    let target = gulp.src('src/index.html'),
+        assets = gulp.src(
+            [
+                'release/styles/bundle.min.css',
+                'release/scripts/bundle.min.js'
+            ], {
+                read: false
+            });
+
+    return target.pipe(plugins.inject(assets, {
+        ignorePath: 'release/',
+        addRootSlash: false,
+        removeTags: true
+    }))
+    .pipe(plugins.htmlmin())
+    .pipe(gulp.dest('release'));
+});
+
+// gulp.task('minify-html', () => {
+//     return gulp.src('release/index.html')
+//             .pipe(plugins.htmlmin({
+//                 minifyJS: true
+//             }))
+//             .pipe(gulp.dest('release'));
 // });
 
-// gulp.task('publish-htmlRev', ['publish-css'], () => {
-//     return gulp.src(['./**/*.json', 'src/index.html'])
-//     .pipe(_.revCollector())
-//     .pipe(gulp.dest('release'));
-// });
+// 删除开发模式的bundle
+gulp.task('del-bundle', (cb) => {
+    return del(
+        [
+            'release/styles/bundle.css',
+            'release/scripts/bundle.js'
+        ]
+    )
+});
 
-// gulp.task('build', gulpSync.sync([
-//     'publish-css',
-//     'publish-htmlRev'
-// ]));
-//
-gulp.task('watch', () => {
-    browserSync.init({
+/**
+ * 启动一个静态资源服务器, 默认端口3000
+ * 监听开发目录src中文件变化
+ * 监听发布目录release中文件变化, 并刷新浏览器
+ */
+gulp.task('watch', function() {
+    browserSync({
+        port: 8888,
+        ui: {
+            port: 8889,
+            weinre: {
+                port: 8886
+            }
+        },
         server: {
             baseDir: 'release/'
         },
         open: false,
-        logPrefix: 'h5Biolerplate',
+        logPrefix: 'H5Biolerplate',
         reloadOnRestart: true
     });
 
@@ -137,19 +196,23 @@ gulp.task('watch', () => {
     gulp.watch('src/scripts/**/*.js', ['publish-js']);
     gulp.watch('src/styles/**/*.css', ['publish-css']);
     gulp.watch('src/imgs/**/*', ['publish-images']);
-    gulp.watch('src/resource/**/*', ['publish-resource']);
+    gulp.watch('src/resource/*', ['publish-resource']);
+    gulp.watch('src/fonts/*', ['publish-fonts']);
 
     gulp.watch('release/index.html').on('change', browserSync.reload);
     gulp.watch('release/scripts/*').on('change', browserSync.reload);
     gulp.watch('release/styles/*').on('change', browserSync.reload);
     gulp.watch('release/resource/*').on('change', browserSync.reload);
+    gulp.watch('release/fonts/*').on('change', browserSync.reload);
 
 });
 
-gulp.task('dev', (cb) => {
+// 开发环境的任务处理, 依照次序依次进行
+gulp.task('dev', function(cb) {
     runSequence(
         ['clean-files'],
         [
+            'publish-fonts',
             'publish-images',
             'publish-resource',
             'publish-css',
@@ -161,12 +224,26 @@ gulp.task('dev', (cb) => {
     );
 });
 
+gulp.task('build', (cb) => {
+    runSequence(
+        [
+            'minify-css',
+            'minify-js'
+        ],
+        [
+            'inject-html',
+            'del-bundle'
+        ],
+        cb
+    );
+});
+
 // default task
-gulp.task('default', ['dev']);
+gulp.task('default', [env]);
 
 
-let errorAlert = (error) => {
-    _.notify.onError({
+let errorAlert = function(error) {
+    notify.onError({
         title: `'Error in plugin' + ${error.plugin}`,
         message: 'Check your terminal',
         sound: 'Sosumi'

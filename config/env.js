@@ -5,4 +5,4 @@ let env = argv.env;
 
 process.env.BIOLERPLATE_ENV = env;
 
-module.exports = env;
+export default env;

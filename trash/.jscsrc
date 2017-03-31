@@ -5,7 +5,7 @@
     "disallowMultipleSpaces": true,
     "disallowNamedUnassignedFunctions": true,
     "disallowNewlineBeforeBlockStatements": true,
-    "disallowQuotedKeysInObjects": true,
+    "disallowQuotedKeysInObjects": false,
     "disallowSpaceAfterObjectKeys": true,
     "disallowSpaceAfterPrefixUnaryOperators": true,
     "disallowSpaceBeforePostfixUnaryOperators": true,
@@ -55,7 +55,7 @@
     },
 
     "safeContextKeyword": ["_this", "that", "self"],
-    "validateIndentation": 4,
+    "validateIndentation": "\t",
     "validateLineBreaks": "LF",
     "validateParameterSeparator": ", ",
     "validateQuoteMarks": "'"
