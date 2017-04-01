@@ -10,7 +10,6 @@ import fs from 'fs';
 import path from 'path';
 
 import del from 'del';
-import request from 'request';
 import browserify from 'browserify';
 import browserSync from 'browser-sync';
 import runSequence from 'run-sequence';
