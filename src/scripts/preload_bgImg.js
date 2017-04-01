@@ -14,9 +14,9 @@
                 imageLoaded(img.src);
                 return;
             }
-            $(img).on('load', function () {
+            $(img).on('load', function() {
                 imageLoaded(img.src);
-            }).on('error', function () {
+            }).on('error', function() {
                 loadImage();
             });
         }
@@ -27,7 +27,7 @@
 
         loadingProgress();
 
-        if(imgsrc.indexOf('-bg.jpg')>0){
+        if (imgsrc.indexOf('-bg.jpg') > 0) {
             imgName = imgsrc.substr(imgsrc.lastIndexOf('/')+1);
             tagName = imgName.split('.')[0];
             $('.'+tagName).css('background-image','url('+imgsrc+')');

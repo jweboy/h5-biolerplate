@@ -1,6 +1,8 @@
 node_modules/
 
 release/
+vendors/
+trash/
 
 npm-debug.log
 yarn.lock

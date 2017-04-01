@@ -1,4 +1,6 @@
 (function() {
+    var Swiper = require('swiper');
+
     var animationControl = require('./animate_control');
 
     var $upArrow = $('#upArrow'),
@@ -54,9 +56,9 @@
             // },
 
             onInit: function(swiper) { // 初始化回调
-                showElements(swiper);
-                // animationControl.initAnimationItems(); // 初始化动画操作
-                // animationControl.playAnimation(swiper); // 播放首屏动画
+                // showElements(swiper);
+                animationControl.initAnimationItems(); // 初始化动画操作
+                animationControl.playAnimation(swiper); // 播放首屏动画
             },
             onTransitionStart: function(swiper) {
                 if (swiper.activeIndex === swiper.slides.length - 1) { // 轮播到最后一页 隐藏向上箭头
@@ -65,26 +67,14 @@
                     $upArrow.show();
                 }
             },
-            onSlideChangeStart: function(swiper) {
-                hideElements(swiper);
-            },
-            // onTransitionEnd: function(swiper) {
-            //     animationControl.playAnimation(swiper); // 播放当前页的动画
-            // },
-            onSlideChangeEnd: function(swiper) {
-                showElements(swiper);
+            onTransitionEnd: function(swiper) {
+                animationControl.playAnimation(swiper); // 播放当前页的动画
             },
             onTouchStart: function(swiper) {
                 // 手机端不自动播放音乐, 通过模拟用户点击触发音乐按钮的点击事件来播放音乐
                 if (!$musicBtn.hasClass('paused') && bgMusic.paused) {
-                    bgMusic.play();
+                   // bgMusic.play();
                 }
-            },
-            onLazyImageLoad: function(swiper, slide, image){
-                  console.log('延迟加载图片');
-                  console.log(swiper);//Swiper实例
-                  console.log(slide);//哪个slide里面的图片在加载
-                  console.log(image);//哪个图片在加载
             }
         });
     }
