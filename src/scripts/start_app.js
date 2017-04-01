@@ -32,6 +32,17 @@
             }
         });
 
+        // 页面装载完成自动播放音乐
+        bgMusic.volume = 0.5;
+        bgMusic.play();
+
+        // 微信环境装载完成自动播放音乐
+        document.addEventListener("WeixinJSBridgeReady", function() {
+            WeixinJSBridge.invoke('getNetworkType', {}, function(e) {
+                bgMusic.play();
+            });
+        }, false);
+
         // 初始化轮播
         new Swiper('.swiper-container', {
             mousewheelControl: true, // 是否开启鼠标控制Swiper切换 （用于调试）
@@ -56,7 +67,6 @@
             // },
 
             onInit: function(swiper) { // 初始化回调
-                // showElements(swiper);
                 animationControl.initAnimationItems(); // 初始化动画操作
                 animationControl.playAnimation(swiper); // 播放首屏动画
             },
@@ -71,21 +81,13 @@
                 animationControl.playAnimation(swiper); // 播放当前页的动画
             },
             onTouchStart: function(swiper) {
-                // 手机端不自动播放音乐, 通过模拟用户点击触发音乐按钮的点击事件来播放音乐
+                // 用户手指触摸到屏幕时自动播放音乐
                 if (!$musicBtn.hasClass('paused') && bgMusic.paused) {
-                   // bgMusic.play();
+                   bgMusic.play();
                 }
             }
         });
     }
-
-    var showElements = function(swiper) {
-        $(swiper.slides[swiper.activeIndex]).find('.slideElement').show();
-    };
-
-    var hideElements = function(swiper) {
-        $(swiper.slides[swiper.previousIndex]).find('.slideElement').hide();
-    };
 
     module.exports = {
         pageRender: pageRender

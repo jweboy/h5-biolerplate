@@ -1,8 +1,8 @@
 @charset "UTF-8";
 
 .btn-music {
-    width: 2rem;
-    height: 2rem;
+    width: 4rem;
+    height: 4rem;
     background-color: transparent;
     position: fixed;
     top: 1.5rem;
@@ -14,12 +14,12 @@
     animation: btnMusicAni 3s infinite linear;
 }
 .btn-music i{
-    width: 2rem;
-    height: 2rem;
+    width: 4rem;
+    height: 4rem;
     text-align: center;
-    line-height: 2rem;
+    line-height: 4rem;
     color: #fff;
-    font-size: 1rem;
+    font-size: 2rem;
     position: absolute;
     top: -0.125rem;
     left: -0.125rem;

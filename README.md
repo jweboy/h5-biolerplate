@@ -25,7 +25,7 @@
 ### 如需删除node_modules目录
 >npm run clean
 
-## 发布模式
+## 发布流程
 
 ### 1.命令行运行
 >npm run build || cnpm run build
