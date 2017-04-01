@@ -10,11 +10,13 @@
   },
   "license": "MIT",
   "browser": {
-    "jquery": "./config/jquery.js",
-    "fastclick": "./config/fastclick.js"
+    "jquery": "./node_modules/jquery/dist/jquery.js",
+    "fastclick":"./vendors/fastclick.min.js",
+    "swiper": "./node_modules/swiper/dist/js/swiper.jquery.js"
   },
   "browserify-shim": {
     "jquery": "$",
+    "swiper": "Swiper",
     "fastclick": "FastClick"
   },
   "browserify": {
@@ -40,6 +42,7 @@
     "gulp-autoprefixer": "^3.1.1",
     "gulp-clean-css": "^3.0.4",
     "gulp-concat": "^2.6.0",
+    "gulp-download": "^0.0.1",
     "gulp-htmlmin": "^3.0.0",
     "gulp-inject": "^4.2.0",
     "gulp-load-plugins": "^1.5.0",
@@ -65,6 +68,7 @@
     "animate.css": "^3.5.2",
     "fastclick": "^1.0.6",
     "jquery": "^3.2.1",
+    "request": "^2.81.0",
     "swiper": "^3.4.2"
   }
 }

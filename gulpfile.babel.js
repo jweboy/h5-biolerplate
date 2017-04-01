@@ -6,7 +6,11 @@
 import gulp from 'gulp';
 import loadPlugins from 'gulp-load-plugins';
 
+import fs from 'fs';
+import path from 'path';
+
 import del from 'del';
+import request from 'request';
 import browserify from 'browserify';
 import browserSync from 'browser-sync';
 import runSequence from 'run-sequence';
@@ -16,33 +20,41 @@ import source from 'vinyl-source-stream';
 
 import env from './config/env';
 import vendors from './config/vendors';
+import syncConfig from './config/sync';
 
 let plugins = loadPlugins();
-console.log(env);
 // console.log('您当前所处的模式:' + env);
 
-/**
- * @example开发环境相关配置
- * @namespace development
- */
 
 /**
- * @example gulp系列的task任务配置
+ * gulp相关任务配置
  *
  */
+
+// 依赖模块 cdn 动态载入
+gulp.task('request-vendors', () => {
+    let jsVendors = vendors.scripts;
+
+    fs.mkdirSync('vendors', 7055); // 创建verdors目录
+
+    return plugins.download(jsVendors) // 下载cdn文件并写入verdors目录
+        .pipe(gulp.dest('vendors'));
+
+});
+
 // 清理文件目录 release
-gulp.task('clean-files', function(cb) {
-    return del(['release'], cb);
+gulp.task('clean-files', (cb) => {
+    return del(['release','vendors'], cb);
 });
 
 // 拷贝媒体资源  copy src/resource => release/resource
-gulp.task('publish-resource', function() {
+gulp.task('publish-resource', () => {
     return gulp.src('src/resource/*')
         .pipe(gulp.dest('release/resource'));
 });
 
 // 拷贝图片资源  copy src/imgs => release/imgs
-gulp.task('publish-images', function() {
+gulp.task('publish-images', () => {
     return gulp.src('src/imgs/*')
         .pipe(gulp.dest('release/imgs'));
 });
@@ -57,9 +69,10 @@ gulp.task('publish-fonts', () => {
  * 合并自定义css和模块依赖css
  * css新属性前缀自动补全
  */
-let cssVendors = vendors.styles;
 
-gulp.task('publish-css', function() {
+gulp.task('publish-css', () => {
+    let cssVendors = vendors.styles;
+
     return streamSeries(
         gulp.src(cssVendors),
         gulp.src('src/styles/**/*.css')
@@ -76,13 +89,9 @@ gulp.task('publish-css', function() {
  * 提取js功能模块,在main主入口中输出模块
  * 合并公用js模块到main.js
  */
-let jsVendors = vendors.scripts;
-jsVendors.push('src/scripts/main.js');
-console.log(jsVendors);
-
-gulp.task('publish-js', function() {
+gulp.task('publish-js', () => {
     return browserify({
-            entries: jsVendors
+            entries: ['src/scripts/main.js']
         })
         .bundle()
         .pipe(plugins.plumber({
@@ -93,7 +102,7 @@ gulp.task('publish-js', function() {
 });
 
 // 将打包合并的bundle.js 与 bundle.css 动态写入到 index.html中
-gulp.task('inject', function() {
+gulp.task('inject', () => {
     let target = gulp.src('src/index.html'),
         assets = gulp.src([
             'release/styles/bundle.css',
@@ -175,22 +184,8 @@ gulp.task('del-bundle', (cb) => {
  * 监听开发目录src中文件变化
  * 监听发布目录release中文件变化, 并刷新浏览器
  */
-gulp.task('watch', function() {
-    browserSync({
-        port: 8888,
-        ui: {
-            port: 8889,
-            weinre: {
-                port: 8886
-            }
-        },
-        server: {
-            baseDir: 'release/'
-        },
-        open: false,
-        logPrefix: 'H5Biolerplate',
-        reloadOnRestart: true
-    });
+gulp.task('watch-dev', () => {
+    browserSync(syncConfig.dev);
 
     gulp.watch('src/index.html', ['inject']);
     gulp.watch('src/scripts/**/*.js', ['publish-js']);
@@ -207,10 +202,15 @@ gulp.task('watch', function() {
 
 });
 
+gulp.task('preview-build', () => {
+    browserSync(syncConfig.build);
+});
+
 // 开发环境的任务处理, 依照次序依次进行
-gulp.task('dev', function(cb) {
+gulp.task('dev', (cb) => {
     runSequence(
         ['clean-files'],
+        ['request-vendors'],
         [
             'publish-fonts',
             'publish-images',
@@ -219,11 +219,12 @@ gulp.task('dev', function(cb) {
             'publish-js'
         ],
         'inject',
-        'watch',
+        'watch-dev',
         cb
     );
 });
 
+// 生产环境的任务处理, 依照次序依次进行
 gulp.task('build', (cb) => {
     runSequence(
         [
@@ -234,6 +235,9 @@ gulp.task('build', (cb) => {
             'inject-html',
             'del-bundle'
         ],
+        [
+            'preview-build'
+        ],
         cb
     );
 });
@@ -242,11 +246,10 @@ gulp.task('build', (cb) => {
 gulp.task('default', [env]);
 
 
-let errorAlert = function(error) {
-    notify.onError({
+let errorAlert = (error) => {
+    plugins.notify.onError({
         title: `'Error in plugin' + ${error.plugin}`,
-        message: 'Check your terminal',
-        sound: 'Sosumi'
+        message: 'Check your terminal'
     })(error);
 
     console.log(error.toString());

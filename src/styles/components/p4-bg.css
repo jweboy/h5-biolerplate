@@ -1,4 +1,4 @@
-.p1-bg .item-image {
+.p4-bg .item-image {
     width: 18rem;
     height: 18rem;
     background-position: center;
@@ -10,7 +10,7 @@
     right: 0;
     margin: auto;
 }
-.p1-bg .item-text {
+.p4-bg .item-text {
     width: 18rem;
     color: #fff;
     font-size: 1.2rem;
