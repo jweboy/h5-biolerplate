@@ -7,3 +7,5 @@ trash/
 npm-debug.log
 yarn.lock
 yarn-error.log
+
+.history
