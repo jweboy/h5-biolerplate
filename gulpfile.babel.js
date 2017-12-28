@@ -15,6 +15,7 @@ import browserSync from 'browser-sync';
 import runSequence from 'run-sequence';
 import streamSeries from 'stream-series';
 import source from 'vinyl-source-stream';
+import download from 'download';
 
 
 import env from './config/env';
@@ -34,16 +35,22 @@ let plugins = loadPlugins();
 gulp.task('request-vendors', () => {
     let jsVendors = vendors.scripts;
 
-    fs.mkdirSync('vendors', 7055); // 创建verdors目录
+    fs.mkdirSync('vendors'); // 创建verdors目录
 
-    return plugins.download(jsVendors) // 下载cdn文件并写入verdors目录
-        .pipe(gulp.dest('vendors'));
+    return download(jsVendors.download)
+        .then(data => {
+            console.log('data', data);
+            return fs.writeFileSync('vendors/fastclick.min.js', data)
+        })
+
+    // return plugins.download(jsVendors) // 下载cdn文件并写入verdors目录
+    //     .pipe(gulp.dest('vendors'));
 
 });
 
 // 清理文件目录 release
 gulp.task('clean-files', (cb) => {
-    return del(['release','vendors'], cb);
+    return del(['release', 'vendors'], cb);
 });
 
 // 拷贝媒体资源  copy src/resource => release/resource
@@ -80,8 +87,8 @@ gulp.task('publish-css', () => {
             }))
             .pipe(plugins.autoprefixer())
     )
-    .pipe(plugins.concat('bundle.css'))
-    .pipe(gulp.dest('release/styles'));
+        .pipe(plugins.concat('bundle.css'))
+        .pipe(gulp.dest('release/styles'));
 });
 
 /**
@@ -90,8 +97,8 @@ gulp.task('publish-css', () => {
  */
 gulp.task('publish-js', () => {
     return browserify({
-            entries: ['src/scripts/main.js']
-        })
+        entries: ['src/scripts/main.js']
+    })
         .bundle()
         .pipe(plugins.plumber({
             errorHandler: errorAlert
@@ -106,16 +113,16 @@ gulp.task('inject', () => {
         assets = gulp.src([
             'release/styles/bundle.css',
             'release/scripts/bundle.js'
-          ], {
-            read: false
-        });
+        ], {
+                read: false
+            });
 
     return target.pipe(plugins.inject(assets, {
         ignorePath: 'release',
         addRootSlash: false,
         removeTags: true
     }))
-    .pipe(gulp.dest('release'));
+        .pipe(gulp.dest('release'));
 });
 
 // 压缩css
@@ -156,8 +163,8 @@ gulp.task('inject-html', () => {
         addRootSlash: false,
         removeTags: true
     }))
-    .pipe(plugins.htmlmin())
-    .pipe(gulp.dest('release'));
+        .pipe(plugins.htmlmin())
+        .pipe(gulp.dest('release'));
 });
 
 // gulp.task('minify-html', () => {
