@@ -39,7 +39,6 @@ gulp.task('request-vendors', () => {
 
     return download(jsVendors.download)
         .then(data => {
-            console.log('data', data);
             return fs.writeFileSync('vendors/fastclick.min.js', data)
         })
 
@@ -80,13 +79,13 @@ gulp.task('publish-css', () => {
     let cssVendors = vendors.styles;
 
     return streamSeries(
-        gulp.src(cssVendors),
-        gulp.src('src/styles/**/*.css')
+            gulp.src(cssVendors),
+            gulp.src('src/styles/**/*.css')
             .pipe(plugins.plumber({
                 errorHandler: errorAlert
             }))
             .pipe(plugins.autoprefixer())
-    )
+        )
         .pipe(plugins.concat('bundle.css'))
         .pipe(gulp.dest('release/styles'));
 });
@@ -97,8 +96,8 @@ gulp.task('publish-css', () => {
  */
 gulp.task('publish-js', () => {
     return browserify({
-        entries: ['src/scripts/main.js']
-    })
+            entries: ['src/scripts/main.js']
+        })
         .bundle()
         .pipe(plugins.plumber({
             errorHandler: errorAlert
@@ -114,14 +113,14 @@ gulp.task('inject', () => {
             'release/styles/bundle.css',
             'release/scripts/bundle.js'
         ], {
-                read: false
-            });
+            read: false
+        });
 
     return target.pipe(plugins.inject(assets, {
-        ignorePath: 'release',
-        addRootSlash: false,
-        removeTags: true
-    }))
+            ignorePath: 'release',
+            addRootSlash: false,
+            removeTags: true
+        }))
         .pipe(gulp.dest('release'));
 });
 
@@ -159,10 +158,10 @@ gulp.task('inject-html', () => {
             });
 
     return target.pipe(plugins.inject(assets, {
-        ignorePath: 'release/',
-        addRootSlash: false,
-        removeTags: true
-    }))
+            ignorePath: 'release/',
+            addRootSlash: false,
+            removeTags: true
+        }))
         .pipe(plugins.htmlmin())
         .pipe(gulp.dest('release'));
 });
@@ -215,9 +214,7 @@ gulp.task('preview-build', () => {
 // 开发环境的任务处理, 依照次序依次进行
 gulp.task('dev', (cb) => {
     runSequence(
-        ['clean-files'],
-        ['request-vendors'],
-        [
+        ['clean-files'], ['request-vendors'], [
             'publish-fonts',
             'publish-images',
             'publish-resource',
@@ -236,12 +233,10 @@ gulp.task('build', (cb) => {
         [
             'minify-css',
             'minify-js'
-        ],
-        [
+        ], [
             'inject-html',
             'del-bundle'
-        ],
-        [
+        ], [
             'preview-build'
         ],
         cb
@@ -262,5 +257,3 @@ let errorAlert = (error) => {
 
     this.emit('end');
 };
-
-
